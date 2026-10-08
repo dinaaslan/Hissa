@@ -1,0 +1,14 @@
+:root {
+    --teal: #14686a;       
+    --sage: #adc9c5;        
+    --sage-light: #e6efed;  
+    --dark: #0f2e2f;       
+    --white: #ffffff;
+}
+
+body {
+    margin: 0;
+    font-family: sans-serif;
+    background: var(--sage-light);
+    color: var(--dark);
+}
