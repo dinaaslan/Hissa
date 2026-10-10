@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حصة | Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Reem+Kufi:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/dashboard" class="brand">
+                <span class="brand-name">حصة</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="/dashboard" class="active">Dashboard</a></li>
+                <li><a href="#">Find &amp; Book</a></li>
+                <li><a href="#">My Bookings</a></li>
+                <li><a href="/about">About Us</a></li>
+                <li><a href="/logout"> Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="page">
+        <div class="container">
+            <h1>Welcome back, {{ student.parent_name }}</h1>
+            <p class="subtitle">Booking for <strong>{{ student.student_name }}</strong> · Grade {{ student.grade }}</p>
+        </div>
+    </div>
+    <footer class="footer">© 2026 حصة</footer>
+</body>
+</html>
