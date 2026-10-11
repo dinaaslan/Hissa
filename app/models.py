@@ -60,7 +60,7 @@ class TutorManager(models.Manager):
         return errors
 
 class SlotManager(models.Manager):
-    def slot_validator(self, post_data, slot_id=None):
+    def slot_validator(self, post_data, tutor, slot_id=None):
         errors={}
         try:
             slot_date=datetime.strptime(post_data['date'],'%Y-%m-%d').date()
@@ -75,7 +75,7 @@ class SlotManager(models.Manager):
             errors['end']="End time must be after start time"
             return errors
         #for handling overlapping slots 
-        overlapping=Slot.objects.filter(
+        overlapping=self.filter(
             tutor=tutor,
             date=slot_date,
             start_time__lt=end,

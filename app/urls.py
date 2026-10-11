@@ -11,4 +11,7 @@ urlpatterns = [
     path('tutor/availability', views.tutor_availability),
     path('logout', views.logout),
     path('about', views.about),
+    path('tutor/slots/add', views.add_slot),
+    path('tutor/slots/<int:slot_id>/edit', views.edit_slot),
+    path('tutor/slots/<int:slot_id>/delete', views.delete_slot), 
 ]
