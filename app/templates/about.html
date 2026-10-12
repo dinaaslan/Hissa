@@ -4,109 +4,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حصة | About Us</title>
+    <title>حصة</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Reem+Kufi:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
-    {% if tutor %}
-        <nav class="navbar dark">
-            <div class="container">
-                <a href="/tutor/availability" class="brand">
-                    <span class="brand-name">حصة</span>
-                    <span class="role-tag">TUTOR</span>
-                </a>
-                <ul class="nav-links">
-                    <li><a href="/tutor/availability">My Availability</a></li>
-                    <li><a href="#">My Sessions</a></li>
-                    <li><a href="/about" class="active">About Us</a></li>
-                    <li><a href="/logout">Logout</a></li>
-                </ul>
-            </div>
-        </nav>
-    {% elif student %}
-        <nav class="navbar">
-            <div class="container">
-                <a href="/dashboard" class="brand">
-                    <span class="brand-name">حصة</span>
-                </a>
-                <ul class="nav-links">
-                    <li><a href="/dashboard">Dashboard</a></li>
-                    <li><a href="#">Find &amp; Book</a></li>
-                    <li><a href="#">My Bookings</a></li>
-                    <li><a href="/about" class="active">About Us</a></li>
-                    <li><a href="/logout">Logout</a></li>
-                </ul>
-            </div>
-        </nav>
-    {% else %}
-        <nav class="navbar">
-            <div class="container">
-                <a href="/" class="brand">
-                    <span class="brand-name">حصة</span>
-                </a>
-                <ul class="nav-links">
-                    <li><a href="/about" class="active">About Us</a></li>
-                    <li><a href="/#join" class="btn-nav">Log in</a></li>
-                </ul>
-            </div>
-        </nav>
-    {% endif %}
-    <div>
-        <div class="hero">
-            <div class="container">
-                <div>
-                    <span class="pill">Our story</span>
-                    <h1>What is <span class="arabic">حصة</span>?</h1>
-                    <p>حصة is a simple way to book a tutor at a time that works for you.</p>
-                    <p>In Arabic, حصة means a class session. That's exactly what we help you get.</p>
-                </div>
-                <img src="{% static 'images/pic.jpg' %}" alt="A tutor and a student at a desk" class="hero-img">
-            </div>
-        </div>
-        <div class="about-box">
-            <div class="container">
-                <h2>Why we made it</h2>
-                <p>Finding a tutor usually means sending a lot of messages. "Are you free?" It takes days just to set up one lesson.</p>
-                <p>We wanted to make that easier. With حصة, tutors add the times they're free, and families can see them right away and pick one. That's it.</p>
-                <p>Tutors set their availability once. Families and students see open times right away and book in a few clicks. No guessing, no double-booking, no wasted time.</p>
-            </div>
-        </div>
-        <div class="about-box about-green">
-            <div class="container">
-                <h2>Who it's for</h2>
-                <div class="about-cards">
-                    <div class="about-card">
-                        <h3>Students &amp; families</h3>
-                        <p>See when tutors are free, book a session, and keep track of your lessons in one place.</p>
-                    </div>
-                    <div class="about-card">
-                        <h3>Tutors</h3>
-                        <p>Add your free times, change them whenever you need, and only get bookings when you're available.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="about-box">
-            <div class="container">
-                <h2>What we hope for</h2>
-                <p>We want to make learning easier to start. When booking is simple, students show up, tutors stay organized, and every hour counts.</p>
-            </div>
-        </div>
-        <div class="about-cta">
-            <div class="container">
-                <h2>Your next lesson is one click away.</h2>
-                {% if tutor %}
-                    <a href="/tutor/availability" class="about-btn">Update my availability</a>
-                {% elif student %}
-                    <a href="/dashboard" class="about-btn">Find a tutor</a>
+    <!-- Nav: the links change depending on who is logged in -->
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="/" class="logo">حصة</a>
+            <div class="nav-links">
+                <a href="/">About</a>
+                {% if request.session.tutor_id %}
+                    <a href="/tutor">Dashboard</a>
+                    <a href="/logout">Log out</a>
+                {% elif request.session.family_id %}
+                    <a href="/dashboard">Dashboard</a>
+                    <a href="/logout">Log out</a>
                 {% else %}
-                    <a href="/#join" class="about-btn">Get started</a>
+                    <a href="/login" class="nav-button">Log in / Register</a>
                 {% endif %}
             </div>
         </div>
+    </nav>
+    <!-- Center -->
+    <div class="hero">
+        <p class="hero-label">Tutoring, booked by real availability</p>
+        <h1>Find a Tutor You Can Trust</h1>
+        <p class="hero-text"> Whether you're a student ready to grow, a parent looking for support, or a tutor ready to make a difference, Hissa helps bring the right people together.</p>
     </div>
-    <footer class="footer">© 2026 حصة</footer>
+    <div class="container">
+        <!-- Three cards for families, tutors, and Ai helper -->
+        <div class="three-cards">
+            <div class="card">
+                <h2>For tutors</h2>
+                <p>Post your open slots and see who booked them.</p>
+            </div>
+            <div class="card">
+                <h2>For families</h2>
+                <p>Describe what you need, find a tutor, and book a free slot.</p>
+            </div>
+            <div class="card">
+                <h2>AI helper</h2>
+                <p>Write your need — حصة finds the subject and the times that fit.</p>
+            </div>
+        </div>
+        <!-- How booking works -->
+        <div class="steps-section">
+            <h2>How booking works</h2>
+            <ol class="steps">
+                <li><span class="step-number">1</span> The tutor adds open hours.</li>
+                <li><span class="step-number">2</span> You describe your need; AI suggests a subject.</li>
+                <li><span class="step-number">3</span> You pick an open hour.</li>
+                <li><span class="step-number">4</span> The tutor sees the booking.</li>
+            </ol>
+        </div>
+        <!-- Built by -->
+        <div class="card built-by">
+            <h2>Built by Dina Aslan</h2>
+            <p>Solo project · Axsos Academy Full-Stack program</p>
+        </div>
+    </div>
+    <footer class="footer">حصة · 2026</footer>
 </body>
 </html>

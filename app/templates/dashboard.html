@@ -4,32 +4,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حصة | Dashboard</title>
+    <title>حصة · Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Reem+Kufi:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="container">
-            <a href="/dashboard" class="brand">
-                <span class="brand-name">حصة</span>
-            </a>
-            <ul class="nav-links">
-                <li><a href="/dashboard" class="active">Dashboard</a></li>
-                <li><a href="#">Find &amp; Book</a></li>
-                <li><a href="#">My Bookings</a></li>
-                <li><a href="/about">About Us</a></li>
-                <li><a href="/logout"> Logout</a></li>
-            </ul>
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="/dashboard" class="logo">حصة</a>
+            <div class="nav-links">
+                <span>Hi, {{ family.full_name }}</span>
+                <a href="/">About</a>
+                <a href="/logout">Log out</a>
+            </div>
         </div>
     </nav>
-    <div class="page">
-        <div class="container">
-            <h1>Welcome back, {{ student.parent_name }}</h1>
-            <p class="subtitle">Booking for <strong>{{ student.student_name }}</strong> · Grade {{ student.grade }}</p>
+    <div class="container dashboard">
+        <!-- AI search box -->
+        <div class="ai-box">
+            <h1>What do you need, and when are you free?</h1>
+            <label for="need">Write it in one sentence</label>
+            <textarea id="need" name="need" rows="3" placeholder="e.g. My son needs help with fractions, weekends after 4"></textarea>
+            <div class="ai-actions">
+                <button type="button" class="btn" disabled>Find my tutor</button>
+            </div>
         </div>
+        <!-- Tutors -->
+        <div>
+            <div class="section-head">
+                <h2>Tutors</h2>
+                <!-- GET form: the chosen subject goes into the URL, e.g. /dashboard?subject=Math -->
+                <form action="/dashboard" method="GET" class="filter-form">
+                    <label for="subject">Subject</label>
+                    <select id="subject" name="subject">
+                        <option value="">All subjects</option>
+                        {% for subject in all_subjects %}
+                            <option value="{{ subject }}" {% if subject == chosen_subject %}selected{% endif %}>{{ subject }}</option>
+                        {% endfor %}
+                    </select>
+                    <button class="btn btn-small">Filter</button>
+                </form>
+            </div>
+            <div class="tutor-grid">
+                {% for tutor in tutors %}
+                    <article class="card tutor-card">
+                        <div class="tutor-avatar"></div>
+                        <h3>{{ tutor.full_name }}</h3>
+                        <p class="tutor-subjects">{{ tutor.subjects }}</p>
+                        <p class="tutor-meta">{{ tutor.grades }} · {{ tutor.price }} ₪ / session</p>
+                        <p class="open-count">{{ tutor.open_count }} open hour{{ tutor.open_count|pluralize }}</p>
+                        <a href="/tutors/{{ tutor.id }}" class="btn btn-outline btn-full">View &amp; book</a>
+                    </article>
+                {% empty %}
+                    <p class="empty">No tutors found{% if chosen_subject %} for {{ chosen_subject }}{% endif %}.</p>
+                {% endfor %}
+            </div>
+        </div>
+        <!-- My bookings -->
+        <div class="card">
+            <h2>My bookings</h2>
+            {% if bookings %}
+                <div class="table-box">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tutor</th>
+                                <th>Subject</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in bookings %}
+                                <tr>
+                                    <td>{{ booking.slot.tutor.full_name }}</td>
+                                    <td>{{ booking.slot.subject }}</td>
+                                    <td>{{ booking.slot.date|date:"D, M j" }}</td>
+                                    <td>{{ booking.slot.start_time|time:"g:i A" }} – {{ booking.slot.end_time|time:"g:i A" }}</td>
+                                    <td>
+                                        <!-- Cancelling: POST form, not a link -->
+                                        <form action="/bookings/{{ booking.id }}/cancel" method="POST">
+                                            {% csrf_token %}
+                                            <button class="link-button">Cancel</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="empty">No bookings yet. Pick a tutor above to book your first hour.</p>
+            {% endif %}
+            </div>
     </div>
-    <footer class="footer">© 2026 حصة</footer>
+    <script src="{% static 'js/scripts.js' %}"></script>
 </body>
 </html>

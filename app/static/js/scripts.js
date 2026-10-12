@@ -1,93 +1,39 @@
-const familyTab = document.getElementById("family_tab");
-const tutorTab = document.getElementById("tutor_tab");
-const familyForms = document.getElementById("family_forms");
-const tutorForms = document.getElementById("tutor_forms");
+// ---------- Second page of the website: Log in / Register ---------- 
+// Which form is showing: role = "tutor" or "family", mode = "login" or "register"
+let role="tutor";
+let mode="login";
 
-if (familyTab && tutorTab) {
-    familyTab.addEventListener("click", function () {
-        familyTab.classList.add("active");
-        tutorTab.classList.remove("active");
-        familyForms.classList.remove("hidden");
-        tutorForms.classList.add("hidden");
-    });
-
-    tutorTab.addEventListener("click", function () {
-        tutorTab.classList.add("active");
-        familyTab.classList.remove("active");
-        tutorForms.classList.remove("hidden");
-        familyForms.classList.add("hidden");
-    });
+function pickRole(newRole){
+    role=newRole;
+    showForm();
 }
 
-//availability
-var slotForm = document.getElementById('slot_form');
-var formHeading = document.getElementById('form_heading');
-var formButton = document.getElementById('form_button');
-var cancelEdit = document.getElementById('cancel_edit');
-var repeatRow = document.getElementById('repeat_row');
-
-var selectedText = document.getElementById('selected_text');
-var editButton = document.getElementById('edit_button');
-var deleteButton = document.getElementById('delete_button');
-var deleteForm = document.getElementById('delete_form');
-
-var selectedSlot = null;
-if (slotForm) {
-
-// Clicking a slot selects it
-var slots = document.querySelectorAll('.slot-open, .slot-booked');
-for (var i = 0; i < slots.length; i++) {
-    slots[i].addEventListener('click', function () {
-        // Remove the highlight from the previous slot
-        if (selectedSlot) {
-            selectedSlot.classList.remove('slot-selected');
-        }
-        selectedSlot = this;
-        selectedSlot.classList.add('slot-selected');
-
-        if (this.dataset.booked === 'yes') {
-            selectedText.innerHTML = '<strong>Selected:</strong> ' + this.dataset.label + ' (booked by ' + this.dataset.student + ')';
-            editButton.disabled = true;
-            deleteButton.disabled = true;
-        } else {
-            selectedText.innerHTML = '<strong>Selected:</strong> ' + this.dataset.label + ' (open)';
-            editButton.disabled = false;
-            deleteButton.disabled = false;
-            deleteForm.action = '/tutor/slots/' + this.dataset.id + '/delete';
-        }
-    });
+function pickMode(newMode){
+    mode=newMode;
+    showForm();
 }
 
-// Edit: fill the form with the slot's values and send it to the edit route
-editButton.addEventListener('click', function () {
-    if (!selectedSlot) {
-        return;
-    }
-    slotForm.action = '/tutor/slots/' + selectedSlot.dataset.id + '/edit';
-    document.getElementById('slot_date').value = selectedSlot.dataset.date;
-    document.getElementById('slot_start').value = selectedSlot.dataset.start;
-    document.getElementById('slot_end').value = selectedSlot.dataset.end;
-    formHeading.textContent = 'Edit open hours';
-    formButton.textContent = 'Save changes';
-    repeatRow.classList.add('hidden');
-    cancelEdit.classList.remove('hidden');
-    slotForm.scrollIntoView({ behavior: 'smooth' });
-});
+function showForm(){
+    //first we hide all forms, then show the one we want according to the selected role
+    document.querySelectorAll(".auth-form").forEach(function(form){
+        form.classList.add("hidden");
+    });
+    document.getElementById(role+"_"+mode).classList.remove("hidden");
+    //then highlight the active buttons
+    document.getElementById("role-tutor").classList.toggle("active", role === "tutor");
+    document.getElementById("role-family").classList.toggle("active", role === "family");
+    document.getElementById("tab-login").classList.toggle("active", mode === "login");
+    document.getElementById("tab-register").classList.toggle("active", mode === "register");
+    //change the bullet points on the left side of the page according to the selected role 
+    document.getElementById("tutor-info").classList.toggle("hidden", role !== "tutor");
+    document.getElementById("family-info").classList.toggle("hidden", role !== "family");
+}
 
-// Cancel editing: put the form back to "Add"
-cancelEdit.addEventListener('click', function () {
-    slotForm.action = '/tutor/slots/add';
-    slotForm.reset();
-    formHeading.textContent = 'Add open hours';
-    formButton.textContent = 'Add slot';
-    repeatRow.classList.remove('hidden');
-    cancelEdit.classList.add('hidden');
-});
-
-// Ask before deleting
-deleteForm.addEventListener('submit', function (event) {
-    if (!confirm('Delete this open hour?')) {
-        event.preventDefault();
-    }
-});
+//only run this on the login page (other pages dont have these forms)
+if (document.getElementById("tutor_login")) {
+// the page tells us which form to open first (after an error it's the same form again)
+    let start = document.body.dataset.open.split("_");   // "tutor_register" -> ["tutor", "register"]
+    role = start[0];
+    mode = start[1];
+    showForm();
 }

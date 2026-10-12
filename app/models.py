@@ -3,32 +3,21 @@ from datetime import date, datetime, timedelta
 import re
 
 EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$')
-PHONE_REGEX = re.compile(r'^[0-9+ ]{9,15}$')
 
-GRADE_CHOICES = [str(number) for number in range(1, 12)]
 
-# This is for session cancellation: it determines how many hours before a session a family can still cancel it
-CANCEL_LIMIT_HOURS = 24
-
-class StudentManager(models.Manager):
+class FamilyManager(models.Manager):
     def register_validator(self, post_data):
         errors = {}
-        if len(post_data['parent_name'].strip()) < 4:
-            errors['parent_name'] = "Parent name must be at least 4 characters."
-        if len(post_data['student_name'].strip()) < 4:
-            errors['student_name'] = "Student name must be at least 4 characters."
-        if post_data['grade'] not in GRADE_CHOICES:
-            errors['grade'] = "Please choose a grade."
-        if not PHONE_REGEX.match(post_data['phone']):
-            errors['phone'] = "Phone number is not valid."
+        if len(post_data['full_name'].strip()) < 4:
+            errors['full_name'] = "Full name must be at least 4 characters."
         if not EMAIL_REGEX.match(post_data['email']):
             errors['email'] = "Email is not valid."
-        elif Student.objects.filter(email=post_data['email'].lower()).exists():
+        elif Family.objects.filter(email=post_data['email'].lower()).exists():
             errors['email'] = "This email is already registered."
         if len(post_data['password']) < 8:
             errors['password'] = "Password must be at least 8 characters."
-        if post_data['password'] != post_data['confirm_password']:
-            errors['confirm_password'] = "Passwords do not match."
+        if post_data['password'] != post_data['confirm']:
+            errors['confirm'] = "Passwords do not match."
         return errors
 
 
@@ -44,7 +33,7 @@ class TutorManager(models.Manager):
         if len(post_data['bio'].strip()) < 10:
             errors['bio'] = "Bio must be at least 10 characters."
         try:
-            price = float(post_data['price'])
+            price = int(post_data['price'])
             if price <= 0:
                 errors['price'] = "Price must be more than 0."
         except ValueError:
@@ -55,52 +44,47 @@ class TutorManager(models.Manager):
             errors['email'] = "This email is already registered."
         if len(post_data['password']) < 8:
             errors['password'] = "Password must be at least 8 characters."
-        if post_data['password'] != post_data['confirm_password']:
-            errors['confirm_password'] = "Passwords do not match."
+        if post_data['password'] != post_data['confirm']:
+            errors['confirm'] = "Passwords do not match."
         return errors
 
 class SlotManager(models.Manager):
-    def slot_validator(self, post_data, tutor, slot_id=None):
-        errors={}
-        try:
-            slot_date=datetime.strptime(post_data['date'],'%Y-%m-%d').date()
-            start = datetime.strptime(post_data['start'], '%H:%M').time()
-            end = datetime.strptime(post_data['end'], '%H:%M').time()
-        except ValueError:
-            errors['date'] = "Please fill in the date, start and end time."
-            return errors
-        if slot_date<date.today():
-            errors['date']="The date cannot be in the past"
+    def slot_validator(self, postData, tutor):
+        errors = {}
+        if postData['date'] == "" or postData['start'] == "" or postData['end'] == "":
+            errors['empty'] = "Please choose a date, a start time and an end time."
+            return errors  # stop here, we can't check times without them
+        if postData['subject'].strip() == "":
+            errors['subject'] = "Please choose a subject."
+
+        # turn the text from the form into real date/time values
+        date = datetime.strptime(postData['date'], "%Y-%m-%d").date()
+        start = datetime.strptime(postData['start'], "%H:%M").time()
+        end = datetime.strptime(postData['end'], "%H:%M").time()
+
         if end <= start:
-            errors['end']="End time must be after start time"
-            return errors
-        #for handling overlapping slots 
-        overlapping=self.filter(
-            tutor=tutor,
-            date=slot_date,
-            start_time__lt=end,
-            end_time__gt=start,
-        )
-        if slot_id:
-            overlapping=overlapping.exclude(id=slot_id)
-        if overlapping.exists():
-            errors['overlap']="This time overlaps an existing slot"
+            errors['time'] = "End time must be after start time."
+        elif datetime.combine(date, start) < datetime.now():
+            errors['past'] = "You can't add an hour in the past."
+        else:
+            # two slots overlap if one starts before the other one ends
+            overlap = Slot.objects.filter(
+                tutor=tutor, date=date, start_time__lt=end, end_time__gt=start
+            ).exists()
+            if overlap:
+                errors['overlap'] = "This hour overlaps with one of your other slots."
         return errors
 
-
-class Student(models.Model):
-    parent_name = models.CharField(max_length=100)
-    student_name = models.CharField(max_length=100)
-    grade = models.CharField(max_length=2)
-    phone = models.CharField(max_length=20)
+class Family(models.Model):
+    full_name= models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    objects = StudentManager()
+    objects = FamilyManager()
 
     def __str__(self):
-        return f"{self.student_name} ({self.parent_name})"
+        return self.full_name
 
 class Tutor(models.Model):
     full_name = models.CharField(max_length=100)
@@ -122,35 +106,21 @@ class Slot(models.Model):
     date=models.DateField()
     start_time=models.TimeField()
     end_time=models.TimeField()
+    is_booked=models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects=SlotManager()
 
-    class Meta: 
-        ordering=['date', 'start_time']
-    def active_booking(self):
-        return self.bookings.filter(status='booked').first()
-    def is_booked(self):
-        return self.bookings.filter(status='booked').exists()
-    
     def __str__(self):
-        return f"{self.tutor} {self.date} {self.start_time}-{self.end_time}"
+        return f"{self.tutor} - {self.date} {self.start_time}"
+
 
 class Booking(models.Model):
-    STATUS_CHOICES = [('booked', 'Booked'), ('cancelled', 'Cancelled')]
     slot=models.ForeignKey(Slot, related_name='bookings', on_delete=models.CASCADE)
-    student=models.ForeignKey(Student, related_name='bookings', on_delete=models.CASCADE)
-    status=models.CharField(max_length=10, choices=STATUS_CHOICES, default='booked')
+    family=models.ForeignKey(Family, related_name='bookings', on_delete=models.CASCADE)
+    note = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def can_cancel(self):
-        session_start=datetime.combine(self.slot.date, self.slot.start_time)
-        return session_start - datetime.now() > timedelta(hours=CANCEL_LIMIT_HOURS)
-    
     def __str__(self):
-        return f"{self.student} with {self.slot}"
-
-
-
-    
+        return f"{self.family} booked {self.slot}"
