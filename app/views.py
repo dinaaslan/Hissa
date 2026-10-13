@@ -1,7 +1,7 @@
 import bcrypt
 from django.contrib import messages
 from django.shortcuts import render, redirect
-from .models import Tutor, Family, Booking
+from .models import Tutor, Family, Booking, Slot
 from datetime import date
 
 # FIRST PAGE: renders the About page (everyone can see it)
@@ -140,6 +140,125 @@ def cancel_booking(request, booking_id):
         slot.save()
         booking.delete()
     return redirect("/dashboard")
+
+#PAGE FIVE: TUTOR DASHBOARD 
+def tutor_dashboard(request):
+    # only logged-in tutors can see this page
+    if "tutor_id" not in request.session:
+        return redirect("/login")
+
+    tutor = Tutor.objects.get(id=request.session["tutor_id"])
+
+    # the subjects this tutor teaches, for the "Add a slot" dropdown
+    my_subjects = []
+    for subject in tutor.subjects.split(","):
+        if subject.strip() != "":
+            my_subjects.append(subject.strip())
+
+    # all this tutor's slots from today on, soonest first
+    slots = tutor.slots.filter(date__gte=date.today()).order_by("date", "start_time")
+
+    # bookings for this tutor's slots (Booking -> slot -> tutor)
+    bookings = Booking.objects.filter(slot__tutor=tutor).order_by("slot__date", "slot__start_time")
+    #editing mode that keeps the filled slots 
+    editing =None 
+    if request.GET.get("edit"):
+        editing=tutor.slots.filter(id=request.GET.get("edit"), is_booked=False).first()
+
+    form=request.session.pop("old_slot", None)
+    if form is None and editing:
+        form={
+            "date": editing.date.strftime("%Y-%m-%d"),
+            "start": editing.start_time.strftime("%H:%M"),
+            "end": editing.end_time.strftime("%H:%M"),
+            "subject": editing.subject,
+        }
+    if form is None:
+        form={"date": "", "start": "", "end": "", "subject": ""}
+
+    context = {
+        "tutor": tutor,
+        "my_subjects": my_subjects,
+        "slots": slots,
+        "bookings": bookings,
+        "editing":editing,
+        "form":form,
+    }
+    return render(request, "tutor_dashboard.html", context)
+
+#CREATE SLOT FEATURE
+def create_slot(request):
+    if "tutor_id" not in request.session:
+        return redirect("/login")
+    if request.method !="POST":
+        return redirect("/tutor")
+    tutor=Tutor.objects.get(id=request.session["tutor_id"])
+    errors=Slot.objects.slot_validator(request.POST,tutor)
+    if errors:
+        for message in errors.values():
+            messages.error(request,message)
+        keep_slot_form(request)
+        return redirect("/tutor")
+    Slot.objects.create(
+        tutor=tutor,
+        date=request.POST["date"],
+        start_time=request.POST["start"],
+        end_time=request.POST["end"],
+        subject=request.POST["subject"],
+    )
+    messages.success(request,"Your open hour was added")
+    return redirect("/tutor")
+
+#FEATURE TO KEEP THE FORM INFO AFTER AN ERROR
+def keep_slot_form(request):
+    request.session["old_slot"]={
+        "date":request.POST["date"],
+        "start":request.POST["start"],
+        "end":request.POST["end"],
+        "subject":request.POST["subject"],
+    }
+
+#UPDATE SLOT FEATURE
+def update_slot(request,slot_id):
+    if "tutor_id" not in request.session:
+        return redirect("/login")
+    if request.method !="POST":
+        return redirect("/tutor")
+
+    tutor=Tutor.objects.get(id=request.session["tutor_id"])
+    #the tutor can edit their own slot and if nobody booked it yet 
+    slot=tutor.slots.filter(id=slot_id, is_booked=False).first()
+    if not slot:
+        return redirect("/tutor")
+
+    errors=Slot.objects.slot_validator(request.POST, tutor, slot_id)
+    if errors:
+        for message in errors.values():
+            messages.error(request,message)
+        keep_slot_form(request)
+        #for staying in edit mode to fix it 
+        return redirect(f"/tutor?edit={slot.id}") 
+    slot.date=request.POST["date"]
+    slot.start_time=request.POST["start"]
+    slot.end_time=request.POST["end"]
+    slot.subject=request.POST["subject"]
+    slot.save()
+    messages.success(request, "your open hour was updated")
+    return redirect("/tutor")
+
+#DELETE SLOT FEATURE
+def delete_slot(request,slot_id):
+    if "tutor_id" not in request.session:
+        return redirect("/login")
+    if request.method !="POST":
+        return redirect("/tutor")
+    slot=Slot.objects.filter(id=slot_id).first()
+    #only the tutor who own and added the slot can delete it and if nobody booked it 
+    if slot and slot.tutor_id==request.session["tutor_id"] and not slot.is_booked:
+        slot.delete()
+    return redirect("/tutor")
+
+
 
 
 

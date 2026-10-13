@@ -539,3 +539,65 @@ td {
 .table-box table {
     min-width: 600px;
 }
+
+/*PAGE 5 TUTOR DASHBOARD*/
+
+.page-title {
+    font-size: 34px;
+    margin: 0;
+}
+/* "Add a slot" on the left, "My slots" on the right; stacked on phones */
+.tutor-top {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.add-slot {
+    flex: 1 1 300px;
+}
+
+.my-slots {
+    flex: 999 1 560px;
+    min-width: 0;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.badge-open {
+    background: var(--pale);
+    color: var(--teal);
+}
+
+.badge-booked {
+    background: var(--teal);
+    color: white;
+}
+
+.success {
+    color: var(--teal);
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 8px;
+}
+
+/* Edit + Delete side by side in the slots table */
+.row-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.cancel-edit {
+    display: block;
+    text-align: center;
+    margin-top: 12px;
+    font-size: 14px;
+}

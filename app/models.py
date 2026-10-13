@@ -49,7 +49,7 @@ class TutorManager(models.Manager):
         return errors
 
 class SlotManager(models.Manager):
-    def slot_validator(self, postData, tutor):
+    def slot_validator(self, postData, tutor, slot_id=None):
         errors = {}
         if postData['date'] == "" or postData['start'] == "" or postData['end'] == "":
             errors['empty'] = "Please choose a date, a start time and an end time."
@@ -69,8 +69,7 @@ class SlotManager(models.Manager):
         else:
             # two slots overlap if one starts before the other one ends
             overlap = Slot.objects.filter(
-                tutor=tutor, date=date, start_time__lt=end, end_time__gt=start
-            ).exists()
+                tutor=tutor, date=date, start_time__lt=end, end_time__gt=start).exclude(id=slot_id).exists()
             if overlap:
                 errors['overlap'] = "This hour overlaps with one of your other slots."
         return errors
@@ -106,6 +105,7 @@ class Slot(models.Model):
     date=models.DateField()
     start_time=models.TimeField()
     end_time=models.TimeField()
+    subject = models.CharField(max_length=100, default="")
     is_booked=models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

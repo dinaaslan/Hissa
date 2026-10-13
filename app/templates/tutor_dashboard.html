@@ -1,0 +1,151 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حصة · My availability</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="/tutor" class="logo">حصة</a>
+            <div class="nav-links">
+                <span>Hi, {{ tutor.full_name }}</span>
+                <a href="/">About</a>
+                <a href="/logout">Log out</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container dashboard">
+        <h1 class="page-title">My availability</h1>
+        <div class="tutor-top">
+            <!-- Add a slot / Edit a slot: the same form, two modes -->
+            {% if editing %}
+                <form action="/slots/{{ editing.id }}/update" method="POST" class="card add-slot">
+                    <h2>Edit open hour</h2>
+            {% else %}
+                <form action="/slots/create" method="POST" class="card add-slot">
+                    <h2>Add an open hour</h2>
+            {% endif %}
+                {% csrf_token %}
+                <label for="date">Date</label>
+                <input type="date" id="date" name="date" value="{{ form.date }}">
+                <div class="two-col">
+                    <div>
+                        <label for="start">Start</label>
+                        <input type="time" id="start" name="start" value="{{ form.start }}">
+                    </div>
+                    <div>
+                        <label for="end">End</label>
+                        <input type="time" id="end" name="end" value="{{ form.end }}">
+                    </div>
+                </div>
+                <label for="subject">Subject</label>
+                <select id="subject" name="subject">
+                    {% for subject in my_subjects %}
+                        <option {% if subject == form.subject %}selected{% endif %}>{{ subject }}</option>
+                    {% endfor %}
+                </select>
+                {% for message in messages %}
+                    <p class="{% if message.tags == 'success' %}success{% else %}error{% endif %}">{{ message }}</p>
+                {% endfor %}
+                {% if editing %}
+                    <button class="btn btn-full">Save changes</button>
+                    <a href="/tutor" class="cancel-edit">Cancel editing</a>
+                {% else %}
+                    <button class="btn btn-full">Add slot</button>
+                {% endif %}
+            </form>
+            <!-- My slots -->
+            <div class="card my-slots">
+                <h2>My slots</h2>
+                {% if slots %}
+                    <div class="table-box">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Subject</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for slot in slots %}
+                                    <tr>
+                                        <td>{{ slot.date|date:"D, M j" }}</td>
+                                        <td>{{ slot.start_time|time:"g:i A" }} – {{ slot.end_time|time:"g:i A" }}</td>
+                                        <td>{{ slot.subject }}</td>
+                                        <td>
+                                            {% if slot.is_booked %}
+                                                <span class="badge badge-booked">Booked</span>
+                                            {% else %}
+                                                <span class="badge badge-open">Open</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if slot.is_booked %}
+                                                —
+                                            {% else %}
+                                                <div class="row-actions">
+                                                    <a href="/tutor?edit={{ slot.id }}">Edit</a>
+                                                    <form action="/slots/{{ slot.id }}/delete" method="POST">
+                                                        {% csrf_token %}
+                                                        <button class="link-button">Delete</button>
+                                                    </form>
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="empty">No open hours yet. Add your first one on the left.</p>
+                {% endif %}
+            </div>
+        </div>
+        <!-- Bookings received -->
+        <div class="card">
+            <h2>Bookings received</h2>
+            {% if bookings %}
+                <div class="table-box">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student / family</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Subject</th>
+                                <th>Note</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in bookings %}
+                                <tr>
+                                    <td>{{ booking.family.full_name }}</td>
+                                    <td>{{ booking.slot.date|date:"D, M j" }}</td>
+                                    <td>{{ booking.slot.start_time|time:"g:i A" }} – {{ booking.slot.end_time|time:"g:i A" }}</td>
+                                    <td>{{ booking.slot.subject }}</td>
+                                    <td>{{ booking.note|default:"—" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="empty">No bookings yet. When a family books one of your hours, it shows here.</p>
+            {% endif %}
+            </div>
+    </div>
+    <script src="{% static 'js/scripts.js' %}"></script>
+</body>
+</html>

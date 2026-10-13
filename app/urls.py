@@ -11,6 +11,10 @@ urlpatterns = [
     path("family/login", views.family_login),
     path("logout", views.logout), 
     path("dashboard", views.dashboard),
+    #TUTOR DASHBOARD 
     path("bookings/<int:booking_id>/cancel", views.cancel_booking),
-
+    path("tutor", views.tutor_dashboard),
+    path("slots/create", views.create_slot),
+    path("slots/<int:slot_id>/update", views.update_slot),
+    path("slots/<int:slot_id>/delete", views.delete_slot),
 ]
