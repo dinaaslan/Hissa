@@ -2,7 +2,8 @@ import bcrypt
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from .models import Tutor, Family, Booking, Slot
-from datetime import date
+from datetime import date, datetime, timedelta
+from django.db import IntegrityError
 
 # FIRST PAGE: renders the About page (everyone can see it)
 def about(request):
@@ -140,6 +141,92 @@ def cancel_booking(request, booking_id):
         slot.save()
         booking.delete()
     return redirect("/dashboard")
+
+#PAGE FOUR TUTOR PROFILE AND BOOKING
+def tutor_profile(request,tutor_id):
+    #only logged in families can view and book
+    if "family_id" not in request.session:
+        return redirect("/login")
+
+    tutor=Tutor.objects.filter(id=tutor_id).first()
+    if not tutor:
+        return redirect("/dashboard")
+    
+    # to show what week: 0 is this week, 1 is next week etc
+    week=request.GET.get("week", "0") 
+    if week.isdigit():
+        week=int(week)
+    else:
+        week=0
+
+    #to show what day of the week
+    today=date.today()
+    saturday=today-timedelta(days=(today.weekday()-5)%7)
+    first_day=saturday+timedelta(weeks=week)
+    days=[]
+    for i in range(6):
+        #loops through the days from sat to thur
+        days.append(first_day+timedelta(days=i))
+
+    #then comes the tutors slots that week
+    slots=tutor.slots.filter(date__gte=days[0], date__lte=days[-1])
+    now=datetime.now()
+    for slot in slots:
+        slot.is_past=datetime.combine(slot.date, slot.start_time) <now #this is a slot that cannot be booked
+
+    start_times=sorted(set(slot.start_time for slot in slots))
+    rows=[]
+    for start_time in start_times:
+        cells=[]
+        for day in days:
+            found=None
+            for slot in slots:
+                if slot.date==day and slot.start_time==start_time:
+                    found=slot #none is unavailable
+            cells.append(found)
+        rows.append ({"time": start_time, "cells": cells})
+    context={
+        "tutor": tutor,
+        "days": days,
+        "rows": rows,
+        "week": week,
+        "subjects": [subject.strip() for subject in tutor.subjects.split(",")],
+    }
+    return render(request, "tutor_profile.html", context)
+
+def book(request):
+    if "family_id" not in request.session:
+        return redirect("/login")
+    if request.method != "POST":
+        return redirect("/dashboard")
+
+    family=Family.objects.get(id=request.session["family_id"])
+    back=f"/tutors/{request.POST['tutor_id']}?week={request.POST['week']}"
+    slot=Slot.objects.filter(id=request.POST.get("slot_id", "0") or 0).first()
+    if not slot:
+        messages.error(request, "Please pick an open hour first")
+        return redirect(back)
+    if len(request.POST["note"]) >500:
+        messages.error(request, "your note is too long (500 characters max)")
+        return redirect(back)
+
+    #we need to check again if someone have booked a slot a second go 
+    starts_at=datetime.combine(slot.date, slot.start_time)
+    if slot.is_booked or starts_at < datetime.now():
+        messages.error(request, "this hour was just taken, please pick another")
+        return redirect(back)
+    try: 
+        Booking.objects.create(slot=slot, family=family, note=request.POST["note"]. strip())
+    except IntegrityError: 
+        #the database only allows one booking per slot (1to1)
+        messages.error(request, "this hour was just taken, please pick another")
+        return redirect(back)
+
+    slot.is_booked=True
+    slot.save()
+    messages.success(request, f"Booked! {slot.tutor.full_name} · {slot.date:%a %b %d} · {slot.start_time:%I:%M %p}")
+    return redirect ("/dashboard")
+
 
 #PAGE FIVE: TUTOR DASHBOARD 
 def tutor_dashboard(request):

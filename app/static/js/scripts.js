@@ -37,3 +37,21 @@ if (document.getElementById("tutor_login")) {
     mode = start[1];
     showForm();
 }
+
+
+// Fouth page:  Tutor profile & booking
+// Clicking an open hour: mark it as "Your pick", remember its id in the form
+function pickSlot(button) {
+    // un-pick every open hour first
+    document.querySelectorAll(".slot-open").forEach(function (other) {
+        other.classList.remove("picked");
+        other.textContent = "Open";
+    });
+    // pick the clicked one
+    button.classList.add("picked");
+    button.textContent = "Your pick";
+    // put its id in the hidden input, so the form sends it to Django
+    document.getElementById("slot_id").value = button.dataset.id;
+    document.getElementById("pick-text").textContent = button.dataset.label;
+    document.getElementById("confirm-btn").disabled = false;
+}

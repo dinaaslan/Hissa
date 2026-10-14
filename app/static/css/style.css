@@ -539,6 +539,211 @@ td {
 .table-box table {
     min-width: 600px;
 }
+/*PAGE 4 TUTOR PROFILE*/
+.back-link {
+    display: inline-block;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.profile-layout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.profile-card {
+    flex: 1 1 280px;
+}
+
+.profile-card h1 {
+    font-size: 26px;
+    margin: 14px 0 10px;
+}
+
+.profile-card p {
+    margin: 0 0 8px;
+    color: var(--muted);
+}
+
+.profile-avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: var(--sage);
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.chip {
+    background: var(--pale);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 14px;
+}
+
+.profile-card .price {
+    color: var(--teal);
+    font-weight: 700;
+}
+
+.profile-card .bio {
+    line-height: 1.6;
+    margin-top: 12px;
+}
+
+.booking-card {
+    flex: 999 1 560px;
+    min-width: 0;
+}
+
+.week-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.week-head h2 {
+    font-size: 22px;
+    margin: 0;
+}
+
+.week-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+}
+
+.week-btn {
+    width: 44px;
+    height: 44px;
+    border: 1px solid #b9cbc8;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    text-decoration: none;
+    color: var(--teal);
+    background: white;
+}
+
+.week-btn.disabled {
+    color: #b9cbc8;
+}
+
+/* 1 column for the hours + 6 columns for Sat-Thu */
+.week-grid {
+    display: grid;
+    grid-template-columns: 80px repeat(6, minmax(70px, 1fr));
+    gap: 8px;
+    min-width: 560px;
+    align-items: center;
+}
+
+.day-name {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.day-name small {
+    font-weight: 400;
+    color: var(--muted);
+}
+
+.hour {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.slot {
+    min-height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.slot-open {
+    background: var(--pale);
+    color: var(--teal);
+    border: 2px solid var(--teal);
+    cursor: pointer;
+}
+
+.slot-open:hover {
+    background: #d4e4e1;
+}
+
+.slot-open.picked {
+    background: var(--teal);
+    color: white;
+}
+
+.slot-taken {
+    background: #d5dddb;
+    color: #4f605e;
+    font-weight: 500;
+}
+
+.slot-none {
+    border: 1px dashed #b9cbc8;
+}
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin: 16px 0 20px;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.legend span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.key {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    display: inline-block;
+}
+.key-open { background: var(--pale); border: 2px solid var(--teal); }
+.key-pick { background: var(--teal); }
+.key-taken { background: #d5dddb; }
+.key-none { border: 1px dashed #b9cbc8; }
+.your-pick {
+    background: var(--pale);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin: 0 0 20px;
+}
+/* success message on the family dashboard after booking */
+.success-box {
+    background: var(--pale);
+    color: var(--teal);
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-weight: 600;
+    margin: 0;
+}
 
 /*PAGE 5 TUTOR DASHBOARD*/
 

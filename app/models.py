@@ -3,7 +3,7 @@ from datetime import date, datetime, timedelta
 import re
 
 EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$')
-
+GRADES = ["Grades 1-6", "Grades 7-9", "Grades 10-12", "University"]
 
 class FamilyManager(models.Manager):
     def register_validator(self, post_data):

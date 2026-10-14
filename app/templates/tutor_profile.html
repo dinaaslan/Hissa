@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حصة · {{ tutor.full_name }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="/dashboard" class="logo">حصة</a>
+            <div class="nav-links">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/">About</a>
+                <a href="/logout">Log out</a>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <a href="/dashboard" class="back-link">← Back to tutors</a>
+        <div class="profile-layout">
+            <!-- Left: tutor info -->
+            <div class="card profile-card">
+                <div class="profile-avatar"></div>
+                <h1>{{ tutor.full_name }}</h1>
+                <div class="chips">
+                    {% for subject in subjects %}
+                        <span class="chip">{{ subject }}</span>
+                    {% endfor %}
+                </div>
+                <p>📍 {{ tutor.city }}</p>
+                <p>Grades: {{ tutor.grades }}</p>
+                <p class="price">{{ tutor.price }} ₪ / session</p>
+                <p class="bio">{{ tutor.bio }}</p>
+            </div>
+            <!-- Right: the week + booking form -->
+            <div class="card booking-card">
+                <div class="week-head">
+                    <h2>Pick an open hour</h2>
+                    <div class="week-nav">
+                        {% if week > 0 %}
+                            <a href="?week={{ week|add:'-1' }}" class="week-btn" aria-label="Previous week">‹</a>
+                        {% else %}
+                            <span class="week-btn disabled">‹</span>
+                        {% endif %}
+                        <span>{{ days.0|date:"M j" }} – {{ days.5|date:"M j" }}</span>
+                        <a href="?week={{ week|add:'1' }}" class="week-btn" aria-label="Next week">›</a>
+                    </div>
+                </div>
+                {% if rows %}
+                    <div class="table-box">
+                        <div class="week-grid">
+                            <!-- header row: empty corner + the 6 days -->
+                            <span></span>
+                            {% for day in days %}
+                                <span class="day-name">{{ day|date:"D" }}<br><small>{{ day|date:"M j" }}</small></span>
+                            {% endfor %}
+                            <!-- one row per start time -->
+                            {% for row in rows %}
+                                <span class="hour">{{ row.time|time:"g:i A" }}</span>
+                                {% for slot in row.cells %}
+                                    {% if not slot %}
+                                        <span class="slot slot-none"></span>
+                                    {% elif slot.is_booked %}
+                                        <span class="slot slot-taken">Taken</span>
+                                    {% elif slot.is_past %}
+                                        <span class="slot slot-none"></span>
+                                    {% else %}
+                                        <button type="button" class="slot slot-open" data-id="{{ slot.id }}" data-label="{{ slot.date|date:'D, M j' }} · {{ slot.start_time|time:'g:i A' }} – {{ slot.end_time|time:'g:i A' }} · {{ slot.subject }}" onclick="pickSlot(this)">Open</button>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="legend">
+                        <span><i class="key key-open"></i>Open</span>
+                        <span><i class="key key-pick"></i>Your pick</span>
+                        <span><i class="key key-taken"></i>Taken</span>
+                        <span><i class="key key-none"></i>Not available</span>
+                    </div>
+                {% else %}
+                    <p class="empty">No open hours this week. Try the next week ›</p>
+                {% endif %}
+                <!-- Booking form: the JavaScript fills slot_id when an hour is clicked -->
+                <form action="/book" method="POST" id="booking-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="slot_id" id="slot_id">
+                    <input type="hidden" name="tutor_id" value="{{ tutor.id }}">
+                    <input type="hidden" name="week" value="{{ week }}">
+                    <p class="your-pick"><strong>Your pick:</strong> <span id="pick-text">click an open hour</span></p>
+                    <label for="note">Note for the tutor (optional)</label>
+                    <textarea id="note" name="note" rows="3" maxlength="500" placeholder="e.g. My son struggles with fractions before his exam"></textarea>
+                    {% for message in messages %}
+                        <p class="error">{{ message }}</p>
+                    {% endfor %}
+                    <button class="btn btn-full" id="confirm-btn" disabled>Confirm booking</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'js/scripts.js' %}"></script>
+</body>
+</html>
