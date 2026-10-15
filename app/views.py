@@ -434,7 +434,15 @@ def find_tutors(request):
             if subject !="" and subject not in all_subjects:
                 all_subjects.append(subject)
     need=understand_need(sentence, all_subjects)
-
+    #if nothing was understood from the sentence, don't show every tutor
+    if need["subject"]=="" and not need["days"] and need["after"] is None and need["at"] is None:
+        context={
+            "sentence":sentence,
+            "need":need,
+            "slots":[],
+            "not_understood":True,
+        }
+        return render(request, "ai_results.html", context)
     #find open hours that match (not booked starting from the current day)
     slots=Slot.objects.filter(is_booked=False, date__gte=date.today()).order_by("date", "start_time")
     if need["subject"] !="":

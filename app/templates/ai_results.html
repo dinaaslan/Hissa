@@ -1,3 +1,6 @@
+{% if not_understood %}
+    <p class="empty">Sorry, حصة couldn't understand that. Try writing a subject and a time, like "Math on Saturday after 4".</p>
+{% else %}
 <p class="small-label">حصة understood ({% if need.by == "AI" %}with AI{% else %}with keywords{% endif %}):</p>
 {% if slots %}
     <div class="card">
@@ -29,4 +32,5 @@
     </div>
 {% else %}
     <p class="empty">No open hours match that yet. Try other days or times.</p>
+{% endif %}
 {% endif %}
