@@ -6,24 +6,86 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>حصة · My availability</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
 
     <nav class="nav">
         <div class="nav-inner">
-            <a href="/tutor" class="logo">حصة</a>
+            <a href="/tutor" class="logo"><span class="logo-mark">ح</span>حصة</a>
             <div class="nav-links">
-                <span>Hi, {{ tutor.full_name }}</span>
+                <a href="/tutor" class="active">Dashboard</a>
                 <a href="/">About</a>
+                <span class="nav-user"><span class="initial">{{ tutor.full_name|make_list|first|upper }}</span>Hi, {{ tutor.full_name }}</span>
                 <a href="/logout">Log out</a>
             </div>
         </div>
     </nav>
-
     <div class="container dashboard">
-        <h1 class="page-title">My availability</h1>
+        <div>
+            <h1 class="page-title">My availability</h1>
+            <p class="page-sub">Add the hours you're free. Families can book them right away.</p>
+        </div>
+        <!-- tutor profile: shows the info, or the edit form  -->
+        <div class="card">
+            {% if editing_profile %}
+                <form action="/tutor/profile" method="POST">
+                    {% csrf_token %}
+                    <h2>Edit my profile</h2>
+                    <div class="two-col">
+                        <div>
+                            <label for="p-name">Full name</label>
+                            <input type="text" id="p-name" name="full_name" value="{{ profile_form.full_name }}">
+                        </div>
+                        <div>
+                            <label for="p-subjects">Subjects taught</label>
+                            <input type="text" id="p-subjects" name="subjects" placeholder="Math, English" value="{{ profile_form.subjects }}">
+                        </div>
+                        <div>
+                            <label for="p-grades">Grade levels</label>
+                            <select id="p-grades" name="grades">
+                                <option value="">Choose levels</option>
+                                {% for grade in grades %}
+                                    <option {% if grade == profile_form.grades %}selected{% endif %}>{{ grade }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="p-city">City</label>
+                            <select id="p-city" name="city">
+                                <option value="">Choose your city</option>
+                                {% for city in cities %}
+                                    <option {% if city == profile_form.city %}selected{% endif %}>{{ city }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <label for="p-price">Session price (₪)</label>
+                    <input type="number" id="p-price" name="price" min="1" value="{{ profile_form.price }}">
+                    <label for="p-bio">Short bio</label>
+                    <textarea id="p-bio" name="bio" rows="3">{{ profile_form.bio }}</textarea>
+                    {% for message in messages %}
+                        {% if "profile" in message.tags %}<p class="error">{{ message }}</p>{% endif %}
+                    {% endfor %}
+                    <div class="form-buttons">
+                        <button class="btn">Save profile</button>
+                        <a href="/tutor">Cancel</a>
+                    </div>
+                </form>
+            {% else %}
+                <div class="section-head">
+                    <h2>My profile</h2>
+                    <a href="/tutor?profile=edit" class="btn btn-outline btn-small">Edit profile</a>
+                </div>
+                <p class="tutor-subjects">{{ tutor.subjects }}</p>
+                <p class="tutor-meta">📍 {{ tutor.city|default:"No city yet" }} · {{ tutor.grades }} · {{ tutor.price|floatformat }} ₪ / session</p>
+                <p>{{ tutor.bio }}</p>
+                {% for message in messages %}
+                    {% if "profile" in message.tags %}<p class="success">{{ message }}</p>{% endif %}
+                {% endfor %}
+            {% endif %}
+        </div>
         <div class="tutor-top">
             <!-- Add a slot / Edit a slot: the same form, two modes -->
             {% if editing %}
@@ -53,7 +115,9 @@
                     {% endfor %}
                 </select>
                 {% for message in messages %}
-                    <p class="{% if message.tags == 'success' %}success{% else %}error{% endif %}">{{ message }}</p>
+                    {% if "profile" not in message.tags %}
+                        <p class="{% if message.tags == 'success' %}success{% else %}error{% endif %}">{{ message }}</p>
+                    {% endif %}
                 {% endfor %}
                 {% if editing %}
                     <button class="btn btn-full">Save changes</button>

@@ -6,22 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>حصة · Log in or Register</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
-<!-- JavaScript determines which form to show first -->
+<!-- JavaScript determines which form to show depending on the picked role -->
 <body data-open="{{ open_form }}">
     <nav class="nav">
         <div class="nav-inner">
-            <a href="/" class="logo">حصة</a>
+            <a href="/" class="logo"><span class="logo-mark">ح</span>حصة</a>
             <div class="nav-links">
-                <a href="/">About</a>
+                <a href="/">← Back to About</a>
             </div>
         </div>
     </nav>
     <div class="container auth-layout">
         <!-- Left panel -->
-        <aside class="auth-side">
+        <div class="auth-side">
             <h1>Welcome to حصة</h1>
             <p>Book a tutor by their real availability.</p>
             <ul id="tutor-info" class="checks">
@@ -32,8 +32,9 @@
                 <li>Describe what you need</li>
                 <li>Book an hour the tutor is free</li>
             </ul>
-        </aside>
-        <!-- Right side of the page: the forms -->
+            <img src="{% static 'images/pic.jpg' %}" alt="A tutor helping three students at a study table">
+        </div>
+        <!-- Loging/register forms -->
         <div class="card auth-card">
             <p class="small-label">I am a…</p>
             <div class="switch">
@@ -62,31 +63,43 @@
                 <div class="two-col">
                     <div>
                         <label for="tr-name">Full name</label>
-                        <input type="text" id="tr-name" name="full_name">
+                        <input type="text" id="tr-name" name="full_name" value="{{ form.full_name }}">
                     </div>
                     <div>
                         <label for="tr-email">Email</label>
-                        <input type="email" id="tr-email" name="email">
+                        <input type="email" id="tr-email" name="email" value="{{ form.email }}">
                     </div>
                     <div>
                         <label for="tr-subjects">Subjects taught</label>
-                        <input type="text" id="tr-subjects" name="subjects" placeholder="Math, English">
+                        <input type="text" id="tr-subjects" name="subjects" placeholder="Math, English" value="{{ form.subjects }}">
                     </div>
                     <div>
                         <label for="tr-grades">Grade levels</label>
                         <select id="tr-grades" name="grades">
                             <option value="">Choose levels</option>
-                            <option>Grades 1-6</option>
-                            <option>Grades 7-9</option>
-                            <option>Grades 10-12</option>
-                            <option>University</option>
+                            {% for grade in grades %}
+                                <option {% if grade == form.grades %}selected{% endif %}>{{ grade }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                 </div>
-                <label for="tr-price">Session price (₪)</label>
-                <input type="number" id="tr-price" name="price" min="1">
+                <div class="two-col">
+                    <div>
+                        <label for="tr-city">City</label>
+                        <select id="tr-city" name="city">
+                            <option value="">Choose your city</option>
+                            {% for city in cities %}
+                                <option {% if city == form.city %}selected{% endif %}>{{ city }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="tr-price">Session price (₪)</label>
+                        <input type="number" id="tr-price" name="price" min="1" value="{{ form.price }}">
+                    </div>
+                </div>
                 <label for="tr-bio">Short bio</label>
-                <textarea id="tr-bio" name="bio" rows="3" placeholder="Your experience and teaching style"></textarea>
+                <textarea id="tr-bio" name="bio" rows="3" placeholder="Your experience and teaching style">{{ form.bio }}</textarea>
                 <div class="two-col">
                     <div>
                         <label for="tr-password">Password</label>

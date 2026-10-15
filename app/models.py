@@ -3,7 +3,8 @@ from datetime import date, datetime, timedelta
 import re
 
 EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$')
-GRADES = ["Grades 1-6", "Grades 7-9", "Grades 10-12", "University"]
+GRADES = ["Grades 1-6", "Grades 7-9", "Grades 10-12"]
+CITIES = ["Bethlehem", "Hebron", "Jenin", "Jericho", "Jerusalem", "Nablus","Qalqilya", "Ramallah", "Salfit", "Tubas", "Tulkarm"]
 
 class FamilyManager(models.Manager):
     def register_validator(self, post_data):
@@ -13,7 +14,7 @@ class FamilyManager(models.Manager):
         if not EMAIL_REGEX.match(post_data['email']):
             errors['email'] = "Email is not valid."
         elif Family.objects.filter(email=post_data['email'].lower()).exists():
-            errors['email'] = "This email is already registered."
+            errors['email'] = "Invalid email."
         if len(post_data['password']) < 8:
             errors['password'] = "Password must be at least 8 characters."
         if post_data['password'] != post_data['confirm']:
@@ -22,7 +23,7 @@ class FamilyManager(models.Manager):
 
 
 class TutorManager(models.Manager):
-    def register_validator(self, post_data):
+    def profile_validator(self, post_data):
         errors = {}
         if len(post_data['full_name'].strip()) < 2:
             errors['full_name'] = "Full name must be at least 2 characters."
@@ -30,6 +31,8 @@ class TutorManager(models.Manager):
             errors['subjects'] = "Please enter the subjects you teach."
         if len(post_data['grades'].strip()) < 1:
             errors['grades'] = "Please enter the grade levels you teach."
+        if post_data.get('city', '') not in CITIES:
+            errors['city'] = "Please choose your city."
         if len(post_data['bio'].strip()) < 10:
             errors['bio'] = "Bio must be at least 10 characters."
         try:
@@ -38,10 +41,14 @@ class TutorManager(models.Manager):
                 errors['price'] = "Price must be more than 0."
         except ValueError:
             errors['price'] = "Price must be a number."
+        return errors
+    #the register validator checks the same fields as profile validator by accessing it, that way the code is not repeated
+    def register_validator(self, post_data):
+        errors=self.profile_validator(post_data)
         if not EMAIL_REGEX.match(post_data['email']):
             errors['email'] = "Email is not valid."
         elif Tutor.objects.filter(email=post_data['email'].lower()).exists():
-            errors['email'] = "This email is already registered."
+            errors['email'] = "Invalid email."
         if len(post_data['password']) < 8:
             errors['password'] = "Password must be at least 8 characters."
         if post_data['password'] != post_data['confirm']:
@@ -89,6 +96,7 @@ class Tutor(models.Model):
     full_name = models.CharField(max_length=100)
     subjects = models.CharField(max_length=200)  
     grades = models.CharField(max_length=100)  
+    city = models.CharField(max_length=50, default="")
     bio = models.TextField()
     price = models.DecimalField(max_digits=6, decimal_places=2)
     email = models.EmailField(unique=True)

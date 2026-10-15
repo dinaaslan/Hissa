@@ -47,14 +47,14 @@
                         {% else %}
                             <span class="week-btn disabled">‹</span>
                         {% endif %}
-                        <span>{{ days.0|date:"M j" }} – {{ days.5|date:"M j" }}</span>
+                        <span>{{ days.0|date:"M j" }} – {{ days.6|date:"M j" }}</span>
                         <a href="?week={{ week|add:'1' }}" class="week-btn" aria-label="Next week">›</a>
                     </div>
                 </div>
                 {% if rows %}
                     <div class="table-box">
                         <div class="week-grid">
-                            <!-- header row: empty corner + the 6 days -->
+                            <!-- header row: empty corner + the  days -->
                             <span></span>
                             {% for day in days %}
                                 <span class="day-name">{{ day|date:"D" }}<br><small>{{ day|date:"M j" }}</small></span>

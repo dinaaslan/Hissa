@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>حصة · Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
@@ -34,13 +34,20 @@
         <div>
             <div class="section-head">
                 <h2>Tutors</h2>
-                <!-- GET form: the chosen subject goes into the URL, e.g. /dashboard?subject=Math -->
+                <!-- GET form: the chosen subject goes into the URL -->
                 <form action="/dashboard" method="GET" class="filter-form">
                     <label for="subject">Subject</label>
                     <select id="subject" name="subject">
                         <option value="">All subjects</option>
                         {% for subject in all_subjects %}
                             <option value="{{ subject }}" {% if subject == chosen_subject %}selected{% endif %}>{{ subject }}</option>
+                        {% endfor %}
+                    </select>
+                    <label for="city">City</label>
+                    <select id="city" name="city">
+                        <option value="">All cities</option>
+                        {% for city in cities %}
+                            <option value="{{ city }}" {% if city == chosen_city %}selected{% endif %}>{{ city }}</option>
                         {% endfor %}
                     </select>
                     <button class="btn btn-small">Filter</button>
@@ -51,13 +58,16 @@
                     <article class="card tutor-card">
                         <div class="tutor-avatar"></div>
                         <h3>{{ tutor.full_name }}</h3>
+                        {% if tutor.city %}
+                            <p class="tutor-meta">📍 {{ tutor.city }}</p>
+                        {% endif %}
                         <p class="tutor-subjects">{{ tutor.subjects }}</p>
                         <p class="tutor-meta">{{ tutor.grades }} · {{ tutor.price }} ₪ / session</p>
                         <p class="open-count">{{ tutor.open_count }} open hour{{ tutor.open_count|pluralize }}</p>
                         <a href="/tutors/{{ tutor.id }}" class="btn btn-outline btn-full">View &amp; book</a>
                     </article>
                 {% empty %}
-                    <p class="empty">No tutors found{% if chosen_subject %} for {{ chosen_subject }}{% endif %}.</p>
+                    <p class="empty">No tutors found{% if chosen_subject %} for {{ chosen_subject }}{% endif %}{% if chosen_city %} in {{ chosen_city }}{% endif %}.</p>
                 {% endfor %}
             </div>
         </div>

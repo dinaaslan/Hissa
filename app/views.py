@@ -1,7 +1,7 @@
 import bcrypt
 from django.contrib import messages
 from django.shortcuts import render, redirect
-from .models import Tutor, Family, Booking, Slot
+from .models import Tutor, Family, Booking, Slot, CITIES, GRADES
 from datetime import date, datetime, timedelta
 from django.db import IntegrityError
 
@@ -23,13 +23,26 @@ def login_page(request):
         return redirect("/dashboard")
     #after an error the same form is open
     open_form=request.session.pop("open_form", "tutor_login")
-    return render(request, "login.html", {"open_form": open_form})
+
+    form=request.session.pop("form", {})
+    context={
+        "open_form":open_form,
+        "form":form,
+        "cities":CITIES,
+        "grades":GRADES,
+    }
+    return render(request, "login.html", context)
 
 #error helper to put every error on the page under the right form and then go back 
 def send_errors(request, errors, form_name):
     for message in errors.values():
         messages.error(request, message, extra_tags=form_name)
     request.session["open_form"] = form_name
+    form={}
+    for key in request.POST:
+        if key not in["password", "confirm", "csrfmiddlewaretoken"]:
+            form[key]=request.POST[key]
+    request.session["form"]=form
     return redirect("/login")
 
 #SECOND PAGE: Tutor login and register 
@@ -44,6 +57,7 @@ def tutor_register(request):
         full_name=request.POST['full_name'].strip(),
         subjects=request.POST['subjects'].strip(),
         grades=request.POST['grades'].strip(),
+        city=request.POST['city'],
         bio=request.POST['bio'].strip(),
         price=int(request.POST['price']),
         email=request.POST['email'].lower(),
@@ -103,6 +117,10 @@ def dashboard(request):
     if chosen_subject!="":
         #__icontains means (contains this text, ignoring upper and lower case) so it matchs every tutor who has those subjects
         tutors=tutors.filter(subjects__icontains=chosen_subject)
+    #city dropdown 
+    chosen_city=request.GET.get("city", "")
+    if chosen_city!="":
+        tutors=tutors.filter(city=chosen_city)
     #counts each tutor's open hours from today onwords 
     for tutor in tutors:
         tutor.open_count=tutor.slots.filter(is_booked=False, date__gte=today).count()
@@ -123,6 +141,8 @@ def dashboard(request):
         "tutors":tutors,
         "all_subjects":all_subjects,
         "chosen_subject":chosen_subject,
+        "cities":CITIES,
+        "chosen_city": chosen_city,
         "bookings":bookings,
     }
     return render(request, "dashboard.html", context)
@@ -164,8 +184,8 @@ def tutor_profile(request,tutor_id):
     saturday=today-timedelta(days=(today.weekday()-5)%7)
     first_day=saturday+timedelta(weeks=week)
     days=[]
-    for i in range(6):
-        #loops through the days from sat to thur
+    for i in range(7):
+        #loops through the days from sat to fri
         days.append(first_day+timedelta(days=i))
 
     #then comes the tutors slots that week
@@ -262,7 +282,19 @@ def tutor_dashboard(request):
         }
     if form is None:
         form={"date": "", "start": "", "end": "", "subject": ""}
-
+    #profile editing 
+    editing_profile=request.GET.get("profile")=="edit"
+    #after an error it shows what the tutor typed, otherwise their saved info
+    profile_form=request.session.pop("old_profile", None)
+    if profile_form is None:
+        profile_form={
+            "full_name":tutor.full_name,
+            "subjects":tutor.subjects,
+            "grades":tutor.grades,
+            "city":tutor.city,
+            "price":int(tutor.price),
+            "bio":tutor.bio,
+        }
     context = {
         "tutor": tutor,
         "my_subjects": my_subjects,
@@ -270,8 +302,42 @@ def tutor_dashboard(request):
         "bookings": bookings,
         "editing":editing,
         "form":form,
+        "editing_profile":editing_profile,
+        "profile_form":profile_form,
+        "cities":CITIES,
+        "grades":GRADES,
     }
     return render(request, "tutor_dashboard.html", context)
+#TUTOR PROFILE EDIT FEATURE
+def update_profile(request):
+    if"tutor_id" not in request.session:
+        return redirect("/login")
+    if request.method !="POST":
+        return redirect("/tutor")
+    tutor=Tutor.objects.get(id=request.session["tutor_id"])
+    errors=Tutor.objects.profile_validator(request.POST)
+    if errors:
+        for message in errors.values():
+            messages.error(request, message, extra_tags="profile")
+        #keep what the tutor typed so the form isnt reset 
+        request.session["old_profile"]={
+            "full_name":request.POST["full_name"],
+            "subjects": request.POST["subjects"],
+            "grades": request.POST["grades"],
+            "city": request.POST.get("city", ""),
+            "price": request.POST["price"],
+            "bio": request.POST["bio"],
+        }
+        return redirect("/tutor?profile=edit")
+    tutor.full_name=request.POST["full_name"].strip()
+    tutor.subjects=request.POST["subjects"].strip()
+    tutor.grades=request.POST["grades"]
+    tutor.city=request.POST["city"]
+    tutor.price=int(request.POST["price"])
+    tutor.bio=request.POST["bio"].strip()
+    tutor.save()
+    messages.success(request, "Your profile was updated", extra_tags="profile")
+    return redirect("/tutor")
 
 #CREATE SLOT FEATURE
 def create_slot(request):

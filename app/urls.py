@@ -19,6 +19,7 @@ urlpatterns = [
     path("book", views.book),
     #TUTOR DASHBOARD 
     path("tutor", views.tutor_dashboard),
+    path("tutor/profile", views.update_profile),
     path("slots/create", views.create_slot),
     path("slots/<int:slot_id>/update", views.update_slot),
     path("slots/<int:slot_id>/delete", views.delete_slot),

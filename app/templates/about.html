@@ -6,16 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>حصة</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
     <!-- Nav: the links change depending on who is logged in -->
     <nav class="nav">
         <div class="nav-inner">
-            <a href="/" class="logo">حصة</a>
+            <a href="/" class="logo"><span class="logo-mark">ح</span>حصة</a>
             <div class="nav-links">
-                <a href="/">About</a>
+                <a href="/" class="active">About</a>
+                <a href="#how">How it works</a>
                 {% if request.session.tutor_id %}
                     <a href="/tutor">Dashboard</a>
                     <a href="/logout">Log out</a>
@@ -23,49 +24,117 @@
                     <a href="/dashboard">Dashboard</a>
                     <a href="/logout">Log out</a>
                 {% else %}
-                    <a href="/login" class="nav-button">Log in / Register</a>
+                    <a href="/login" class="btn btn-small">Log in / Register</a>
                 {% endif %}
             </div>
         </div>
     </nav>
-    <!-- Center -->
+    <!-- Middle section -->
     <div class="hero">
-        <p class="hero-label">Tutoring, booked by real availability</p>
-        <h1>Find a Tutor You Can Trust</h1>
-        <p class="hero-text"> Whether you're a student ready to grow, a parent looking for support, or a tutor ready to make a difference, Hissa helps bring the right people together.</p>
+        <div class="hero-inner">
+            <div class="hero-copy">
+                <p class="hero-label">Tutoring, booked by real availability</p>
+                <h1>Find a tutor who's free when you are.</h1>
+                <p class="hero-text">Tell حصة what you need in one sentence. We show you tutors with open hours that fit, and you book in one click.</p>
+                <div class="hero-buttons">
+                    {% if request.session.tutor_id %}
+                        <a href="/tutor" class="btn">Go to my dashboard</a>
+                    {% elif request.session.family_id %}
+                        <a href="/dashboard" class="btn">Find a tutor</a>
+                    {% else %}
+                        <a href="/login" class="btn">Get started</a>
+                    {% endif %}
+                    <a href="#how" class="btn btn-light">See how it works</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="{% static 'images/pic.jpg' %}" alt="picture">
+            </div>
+        </div>
     </div>
-    <div class="container">
-        <!-- Three cards for families, tutors, and Ai helper -->
+    <div class="container about-sections">
+        <!-- Three cards for families, tutors, and AI helper -->
         <div class="three-cards">
             <div class="card">
-                <h2>For tutors</h2>
-                <p>Post your open slots and see who booked them.</p>
-            </div>
-            <div class="card">
+                <span class="card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"></path><circle cx="17.5" cy="9" r="2.5"></circle><path d="M17 14.5c2.4.3 4 1.9 4.5 4.5"></path></svg>
+                </span>
                 <h2>For families</h2>
-                <p>Describe what you need, find a tutor, and book a free slot.</p>
+                <p>Describe what you need, find a tutor with hours that match, and book a free slot.</p>
             </div>
             <div class="card">
+                <span class="card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2.5"></rect><path d="M3 9.5h18M8 2.5v4M16 2.5v4M8 14h3M8 17h6"></path></svg>
+                </span>
+                <h2>For tutors</h2>
+                <p>Post your open hours once. Families book them directly, and you see every booking in one place.</p>
+            </div>
+            <div class="card">
+                <span class="card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"></path></svg>
+                </span>
                 <h2>AI helper</h2>
-                <p>Write your need — حصة finds the subject and the times that fit.</p>
+                <p>Write your need in your own words. حصة finds the subject and the times that fit.</p>
+            </div>
+        </div>
+        <!--  AI helper: explanation + example -->
+        <div class="ai-section">
+            <div class="ai-section-text">
+                <p class="eyebrow">Meet the AI helper</p>
+                <h2>One sentence is all it takes</h2>
+                <p>Write what your child needs and when you're free, the way you'd say it to a friend. حصة picks out the subject and the times, then shows only tutors with matching open hours.</p>
+            </div>
+            <div class="card ai-example">
+                <span class="ai-example-label">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg>
+                    AI helper
+                </span>
+                <div class="ai-example-need">"My daughter needs physics for Tawjihi, Sundays after 4"</div>
+                <div class="chips">
+                    <span class="chip">Physics</span>
+                    <span class="chip">Grades 10-12</span>
+                    <span class="chip">Sun · after 4 PM</span>
+                </div>
+                <div class="ai-example-tutor">
+                    <span class="avatar">R</span>
+                    <div>
+                        <strong>Hiba. G</strong>
+                        <small>Open: Sun 4:00 PM, Sun 5:00 PM</small>
+                    </div>
+                    <span class="ai-example-book">Book</span>
+                </div>
             </div>
         </div>
         <!-- How booking works -->
-        <div class="steps-section">
-            <h2>How booking works</h2>
+        <div class="steps-section" id="how">
+            <div>
+                <p class="eyebrow">How booking works</p>
+                <h2>Four steps, no back-and-forth</h2>
+            </div>
             <ol class="steps">
-                <li><span class="step-number">1</span> The tutor adds open hours.</li>
-                <li><span class="step-number">2</span> You describe your need; AI suggests a subject.</li>
-                <li><span class="step-number">3</span> You pick an open hour.</li>
-                <li><span class="step-number">4</span> The tutor sees the booking.</li>
+                <li><span class="step-number">1</span><strong>The tutor adds open hours</strong><span>Each hour has a date, time and subject.</span></li>
+                <li><span class="step-number">2</span><strong>You describe your need</strong><span>The AI suggests the subject and your free times.</span></li>
+                <li><span class="step-number">3</span><strong>You pick an open hour</strong><span>Only hours that are really free show up.</span></li>
+                <li><span class="step-number">4</span><strong>The tutor sees the booking</strong><span>With your note, right on their dashboard.</span></li>
             </ol>
         </div>
-        <!-- Built by -->
-        <div class="card built-by">
-            <h2>Built by Dina Aslan</h2>
-            <p>Solo project · Axsos Academy Full-Stack program</p>
-        </div>
+        <!-- Call to action -->
+        {% if not request.session.tutor_id and not request.session.family_id %}
+            <div class="cta-band">
+                <div>
+                    <h2>Ready for your first حصة?</h2>
+                    <p>Create a free account as a family or a tutor.</p>
+                </div>
+                <a href="/login" class="btn">Get started</a>
+            </div>
+        {% endif %}
     </div>
-    <footer class="footer">حصة · 2026</footer>
+    <!-- About the developer -->
+    <footer class="footer">
+        <div class="footer-inner">
+            <span><strong>حصة</strong> · 2026</span>
+            <span>Built by Dina Aslan · Solo project, Axsos Academy Full-Stack program</span>
+        </div>
+    </footer>
 </body>
 </html>
