@@ -1,14 +1,4 @@
-<p>حصة understood:
-    Subject: {{ need.subject|default:"any" }} ·
-    Days: {% for day in need.days %}{{ day }} {% empty %}any{% endfor %} ·
-    {% if need.at %}
-        At: {{ need.at }}:00
-    {% elif need.after %}
-        After: {{ need.after }}:00
-    {% else %}
-        Any time
-    {% endif %}
-</p>
+<p class="small-label">حصة understood ({% if need.by == "AI" %}with AI{% else %}with keywords{% endif %}):</p>
 {% if slots %}
     <div class="card">
         <h2>Open hours that fit</h2>

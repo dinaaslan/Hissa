@@ -43,6 +43,7 @@ let aiForm = document.getElementById("ai-form");
 if (aiForm) {
     aiForm.addEventListener("submit", function (event) {
         event.preventDefault();   // stop the normal submit (it would reload the page)
+        document.getElementById("ai-results").innerHTML = "<p class='empty'>Looking for tutors...</p>";
         fetch("/find-tutors", { method: "POST", body: new FormData(aiForm) })
             .then(function (response) {
                 return response.text();   // the view sends back HTML
