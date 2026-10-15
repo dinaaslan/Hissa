@@ -6,7 +6,7 @@ The main focus of the project is **availability**: a family only sees hours that
 
 ## Live Demo
 
-Coming soon (deployed on AWS)
+http://52.58.189.12
 
 ## Features
 
@@ -72,9 +72,9 @@ If the AI is not available (no API key or no internet), the app uses a simple ke
 A tutor has many slots, a family has many bookings, and each booking belongs to one slot.
 
 
-## Screenshots
+## Wireframe
 
-Coming soon
+![Hissa wireframe](wireframes/hissa.png)
 
 ## Author
 
