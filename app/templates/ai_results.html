@@ -1,0 +1,42 @@
+<p>حصة understood:
+    Subject: {{ need.subject|default:"any" }} ·
+    Days: {% for day in need.days %}{{ day }} {% empty %}any{% endfor %} ·
+    {% if need.at %}
+        At: {{ need.at }}:00
+    {% elif need.after %}
+        After: {{ need.after }}:00
+    {% else %}
+        Any time
+    {% endif %}
+</p>
+{% if slots %}
+    <div class="card">
+        <h2>Open hours that fit</h2>
+        <div class="table-box">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tutor</th>
+                        <th>City</th>
+                        <th>Subject</th>
+                        <th>When</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for slot in slots %}
+                        <tr>
+                            <td>{{ slot.tutor.full_name }}</td>
+                            <td>{{ slot.tutor.city }}</td>
+                            <td>{{ slot.subject }}</td>
+                            <td>{{ slot.date|date:"D, M j" }} · {{ slot.start_time|time:"g:i A" }}</td>
+                            <td><a href="/tutors/{{ slot.tutor.id }}?week={{ slot.week }}">View &amp; book</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% else %}
+    <p class="empty">No open hours match that yet. Try other days or times.</p>
+{% endif %}

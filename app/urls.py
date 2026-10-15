@@ -23,4 +23,6 @@ urlpatterns = [
     path("slots/create", views.create_slot),
     path("slots/<int:slot_id>/update", views.update_slot),
     path("slots/<int:slot_id>/delete", views.delete_slot),
+    #Ajax
+    path("find-tutors", views.find_tutors),
 ]

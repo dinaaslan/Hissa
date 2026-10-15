@@ -38,7 +38,20 @@ if (document.getElementById("tutor_login")) {
     showForm();
 }
 
-
+//Third page: family dashboard (AI helper with Ajax)
+let aiForm = document.getElementById("ai-form");
+if (aiForm) {
+    aiForm.addEventListener("submit", function (event) {
+        event.preventDefault();   // stop the normal submit (it would reload the page)
+        fetch("/find-tutors", { method: "POST", body: new FormData(aiForm) })
+            .then(function (response) {
+                return response.text();   // the view sends back HTML
+            })
+            .then(function (html) {
+                document.getElementById("ai-results").innerHTML = html;   // show it on the page
+            });
+    });
+}
 // Fouth page:  Tutor profile & booking
 // Clicking an open hour: mark it as "Your pick", remember its id in the form
 function pickSlot(button) {

@@ -22,14 +22,16 @@
     </nav>
     <div class="container dashboard">
         <!-- AI search box -->
-        <div class="ai-box">
+        <form class="ai-box" id="ai-form">
+            {% csrf_token %}
             <h1>What do you need, and when are you free?</h1>
             <label for="need">Write it in one sentence</label>
             <textarea id="need" name="need" rows="3" placeholder="e.g. My son needs help with fractions, weekends after 4"></textarea>
             <div class="ai-actions">
-                <button type="button" class="btn" disabled>Find my tutor</button>
+                <button class="btn" id="ai-button">Find my tutor</button>
             </div>
-        </div>
+        </form>
+        <div id="ai-results"></div>
         <!-- Tutors -->
         <div>
             <div class="section-head">

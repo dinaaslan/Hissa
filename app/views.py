@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from .models import Tutor, Family, Booking, Slot, CITIES, GRADES
 from datetime import date, datetime, timedelta
 from django.db import IntegrityError
+from .ai import understand_need
 
 # FIRST PAGE: renders the About page (everyone can see it)
 def about(request):
@@ -410,6 +411,48 @@ def delete_slot(request,slot_id):
     if slot and slot.tutor_id==request.session["tutor_id"] and not slot.is_booked:
         slot.delete()
     return redirect("/tutor")
+
+#Ajax: receives the sentence and sends back a small piece of html 
+def find_tutors(request):
+    if"family_id" not in request.session:
+        return redirect("/login")
+    sentence=request.POST.get("need", "")
+    #loop through the subjects tutors teach 
+    all_subjects=[]
+    for tutor in Tutor.objects.all():
+        for subject in tutor.subjects.split(","):
+            subject=subject.strip()
+            if subject !="" and subject not in all_subjects:
+                all_subjects.append(subject)
+    need=understand_need(sentence, all_subjects)
+
+    #find open hours that match (not booked starting from the current day)
+    slots=Slot.objects.filter(is_booked=False, date__gte=date.today()).order_by("date", "start_time")
+    if need["subject"] !="":
+        slots=slots.filter(subject__icontains=need["subject"])
+    today=date.today()
+    saturday=today-timedelta(days=(today.weekday()-5)%7)
+    matching=[]
+    for slot in slots:
+        day=slot.date.strftime("%a") #the same short names as DAYS
+        hour=slot.start_time.hour #17 for 5pm
+        if datetime.combine(slot.date, slot.start_time) <datetime.now():
+            continue #the hour has already passed today
+        if need["days"] and day not in need["days"]:
+            continue #this means its the wrong day
+        if need["after"] and hour < need["after"]:
+            continue #too early
+        if need["at"] and hour !=need["at"]:
+            continue #not at that hour 
+        #which week it is in, so view and book opens the right week
+        slot.week=(slot.date-saturday).days//7
+        matching.append(slot)
+    context={
+        "sentence":sentence,
+        "need":need,
+        "slots":matching[:10] #show at most 10 
+    }
+    return render(request, "ai_results.html", context)
 
 
 
