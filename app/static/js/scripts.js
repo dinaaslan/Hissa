@@ -69,3 +69,12 @@ function pickSlot(button) {
     document.getElementById("pick-text").textContent = button.dataset.label;
     document.getElementById("confirm-btn").disabled = false;
 }
+// coming from the AI results: pick the hour that matched automatically
+let params = new URLSearchParams(window.location.search);
+let chosenSlot = params.get("slot");
+if (chosenSlot) {
+    let button = document.querySelector('.slot-open[data-id="' + chosenSlot + '"]');
+    if (button) {
+        pickSlot(button);
+    }
+}

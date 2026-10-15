@@ -23,7 +23,7 @@
                             <td>{{ slot.tutor.city }}</td>
                             <td>{{ slot.subject }}</td>
                             <td>{{ slot.date|date:"D, M j" }} · {{ slot.start_time|time:"g:i A" }}</td>
-                            <td><a href="/tutors/{{ slot.tutor.id }}?week={{ slot.week }}">View &amp; book</a></td>
+                            <td><a href="/tutors/{{ slot.tutor.id }}?week={{ slot.week }}&slot={{ slot.id }}">View &amp; book</a></td>
                         </tr>
                     {% endfor %}
                 </tbody>
