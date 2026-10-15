@@ -3,8 +3,19 @@ from datetime import date, datetime, timedelta
 import re
 
 EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$')
+PHONE_REGEX = re.compile(r'^05\d{8}$')
 GRADES = ["Grades 1-6", "Grades 7-9", "Grades 10-12"]
 CITIES = ["Bethlehem", "Hebron", "Jenin", "Jericho", "Jerusalem", "Nablus","Qalqilya", "Ramallah", "Salfit", "Tubas", "Tulkarm"]
+
+def check_phone(post_data, errors):
+    phone=post_data.get('phone', '').replace(" ", "").replace("-", "")
+    if not PHONE_REGEX.match(phone):
+        errors['phone']="Please enter a phone number like 0599123456"
+    if post_data.get('phone_code', '') not in ["970", "972"]:
+        errors['phone_code']="Please choose +970 or +972"
+
+def whatsapp_link(code, phone):
+    return "https://wa.me/" + code + phone[1:]
 
 class FamilyManager(models.Manager):
     def register_validator(self, post_data):
@@ -19,6 +30,7 @@ class FamilyManager(models.Manager):
             errors['password'] = "Password must be at least 8 characters."
         if post_data['password'] != post_data['confirm']:
             errors['confirm'] = "Passwords do not match."
+        check_phone(post_data, errors)
         return errors
 
 
@@ -41,6 +53,7 @@ class TutorManager(models.Manager):
                 errors['price'] = "Price must be more than 0."
         except ValueError:
             errors['price'] = "Price must be a number."
+        check_phone(post_data, errors)
         return errors
     #the register validator checks the same fields as profile validator by accessing it, that way the code is not repeated
     def register_validator(self, post_data):
@@ -84,6 +97,8 @@ class SlotManager(models.Manager):
 class Family(models.Model):
     full_name= models.CharField(max_length=100)
     email = models.EmailField(unique=True)
+    phone = models.CharField(max_length=20, default="")
+    phone_code = models.CharField(max_length=3, default="970")
     password = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -92,11 +107,16 @@ class Family(models.Model):
     def __str__(self):
         return self.full_name
 
+    def whatsapp(self):
+        return whatsapp_link(self.phone_code, self.phone)
+
 class Tutor(models.Model):
     full_name = models.CharField(max_length=100)
     subjects = models.CharField(max_length=200)  
     grades = models.CharField(max_length=100)  
     city = models.CharField(max_length=50, default="")
+    phone = models.CharField(max_length=20, default="")
+    phone_code = models.CharField(max_length=3, default="970")
     bio = models.TextField()
     price = models.DecimalField(max_digits=6, decimal_places=2)
     email = models.EmailField(unique=True)
@@ -107,6 +127,9 @@ class Tutor(models.Model):
 
     def __str__(self):
         return self.full_name
+
+    def whatsapp(self):
+        return whatsapp_link(self.phone_code, self.phone)
 
 class Slot(models.Model):
     tutor=models.ForeignKey(Tutor, related_name='slots', on_delete=models.CASCADE)

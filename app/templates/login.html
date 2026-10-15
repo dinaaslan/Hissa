@@ -39,7 +39,7 @@
             <p class="small-label">I am a…</p>
             <div class="switch">
                 <button type="button" id="role-tutor" onclick="pickRole('tutor')">Tutor</button>
-                <button type="button" id="role-family" onclick="pickRole('family')">Student / family</button>
+                <button type="button" id="role-family" onclick="pickRole('family')">Family</button>
             </div>
             <div class="tabs">
                 <button type="button" id="tab-login" onclick="pickMode('login')">Log in</button>
@@ -98,6 +98,14 @@
                         <input type="number" id="tr-price" name="price" min="1" value="{{ form.price }}">
                     </div>
                 </div>
+                <label for="tr-phone">WhatsApp number</label>
+                        <div class="phone-row">
+                        <select name="phone_code">
+                            <option value="970">+970</option>
+                            <option value="972">+972</option>
+                        </select>
+                        <input type="tel" id="tr-phone" name="phone" placeholder="0597201305" value="{{ form.phone }}">
+                        </div>
                 <label for="tr-bio">Short bio</label>
                 <textarea id="tr-bio" name="bio" rows="3" placeholder="Your experience and teaching style">{{ form.bio }}</textarea>
                 <div class="two-col">
@@ -138,6 +146,16 @@
                     <div>
                         <label for="fr-email">Email</label>
                         <input type="email" id="fr-email" name="email">
+                    </div>
+                    <div>
+                        <label for="tr-phone">WhatsApp number</label>
+                        <div class="phone-row">
+                        <select name="phone_code">
+                            <option value="970">+970</option>
+                            <option value="972">+972</option>
+                        </select>
+                        <input type="tel" id="tr-phone" name="phone" placeholder="0597201305" value="{{ form.phone }}">
+                        </div>
                     </div>
                     <div>
                         <label for="fr-password">Password</label>

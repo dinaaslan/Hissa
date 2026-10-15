@@ -85,6 +85,7 @@
                                 <th>Subject</th>
                                 <th>Date</th>
                                 <th>Time</th>
+                                <th>Contact</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -96,7 +97,14 @@
                                     <td>{{ booking.slot.date|date:"D, M j" }}</td>
                                     <td>{{ booking.slot.start_time|time:"g:i A" }} – {{ booking.slot.end_time|time:"g:i A" }}</td>
                                     <td>
-                                        <!-- Cancelling: POST form, not a link -->
+                                        {% if booking.slot.tutor.phone %}
+                                            <a href="{{ booking.slot.tutor.whatsapp }}" target="_blank" class="btn btn-small">WhatsApp</a>
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <!-- Cancelling: POST form -->
                                         <form action="/bookings/{{ booking.id }}/cancel" method="POST">
                                             {% csrf_token %}
                                             <button class="link-button">Cancel</button>

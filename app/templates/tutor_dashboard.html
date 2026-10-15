@@ -63,6 +63,14 @@
                     </div>
                     <label for="p-price">Session price (₪)</label>
                     <input type="number" id="p-price" name="price" min="1" value="{{ profile_form.price }}">
+                    <label for="p-phone">WhatsApp number</label>
+                    <div class="phone-row">
+                        <select name="phone_code">
+                            <option value="970" {% if profile_form.phone_code == "970" %}selected{% endif %}>+970</option>
+                            <option value="972" {% if profile_form.phone_code == "972" %}selected{% endif %}>+972</option>
+                        </select>
+                        <input type="tel" id="p-phone" name="phone" placeholder="0599123456" value="{{ profile_form.phone }}">
+                    </div>
                     <label for="p-bio">Short bio</label>
                     <textarea id="p-bio" name="bio" rows="3">{{ profile_form.bio }}</textarea>
                     {% for message in messages %}
@@ -80,6 +88,7 @@
                 </div>
                 <p class="tutor-subjects">{{ tutor.subjects }}</p>
                 <p class="tutor-meta">📍 {{ tutor.city|default:"No city yet" }} · {{ tutor.grades }} · {{ tutor.price|floatformat }} ₪ / session</p>
+                <p class="tutor-meta">📱 {{ tutor.phone|default:"No WhatsApp number yet" }}</p>
                 <p>{{ tutor.bio }}</p>
                 {% for message in messages %}
                     {% if "profile" in message.tags %}<p class="success">{{ message }}</p>{% endif %}
@@ -190,6 +199,7 @@
                                 <th>Time</th>
                                 <th>Subject</th>
                                 <th>Note</th>
+                                <th>Contact</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -200,6 +210,13 @@
                                     <td>{{ booking.slot.start_time|time:"g:i A" }} – {{ booking.slot.end_time|time:"g:i A" }}</td>
                                     <td>{{ booking.slot.subject }}</td>
                                     <td>{{ booking.note|default:"—" }}</td>
+                                    <td>
+                                        {% if booking.family.phone %}
+                                            <a href="{{ booking.family.whatsapp }}" target="_blank" class="btn btn-small">WhatsApp</a>
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
                                 </tr>
                             {% endfor %}
                         </tbody>

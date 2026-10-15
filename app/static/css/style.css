@@ -152,6 +152,15 @@ textarea {
     margin-bottom: 16px;
 }
 
+/* +970/+972 dropdown next to the phone input */
+.phone-row {
+    display: flex;
+    gap: 8px;
+}
+
+.phone-row select {
+    width: 100px;
+}
 /* BUTTONS */
 .btn {
     display: inline-block;

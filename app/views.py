@@ -62,6 +62,8 @@ def tutor_register(request):
         bio=request.POST['bio'].strip(),
         price=int(request.POST['price']),
         email=request.POST['email'].lower(),
+        phone=request.POST['phone'].replace(" ", "").replace("-", ""),
+        phone_code=request.POST['phone_code'],
         password=hashed
     )
     request.session.flush()
@@ -89,6 +91,8 @@ def family_register(request):
     family=Family.objects.create(
         full_name=request.POST['full_name'].strip(),
         email=request.POST['email'].lower(),
+        phone=request.POST['phone'].replace(" ", "").replace("-", ""),
+        phone_code=request.POST['phone_code'],
         password=hashed
     )
     request.session.flush()
@@ -295,6 +299,7 @@ def tutor_dashboard(request):
             "city":tutor.city,
             "price":int(tutor.price),
             "bio":tutor.bio,
+            "phone":tutor.phone,
         }
     context = {
         "tutor": tutor,
@@ -328,6 +333,8 @@ def update_profile(request):
             "city": request.POST.get("city", ""),
             "price": request.POST["price"],
             "bio": request.POST["bio"],
+            "phone": request.POST.get("phone", ""),
+            "phone_code": request.POST.get("phone_code", "970"),
         }
         return redirect("/tutor?profile=edit")
     tutor.full_name=request.POST["full_name"].strip()
@@ -336,6 +343,8 @@ def update_profile(request):
     tutor.city=request.POST["city"]
     tutor.price=int(request.POST["price"])
     tutor.bio=request.POST["bio"].strip()
+    tutor.phone=request.POST["phone"].replace(" ", "").replace("-", "")
+    tutor.phone_code=request.POST["phone_code"] 
     tutor.save()
     messages.success(request, "Your profile was updated", extra_tags="profile")
     return redirect("/tutor")
